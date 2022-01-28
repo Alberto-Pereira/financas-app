@@ -2,6 +2,10 @@ import React from 'react'
 
 import Card from '../components/card'
 import FormGroup from '../components/form-group'
+import { withRouter } from 'react-router-dom'
+import UsuarioService from '../app/service/usuarioService'
+import LocalStorageService from '../app/service/localstorageService'
+import { mensagemErro } from '../components/toastr-cp'
 
 class Login extends React.Component{
 
@@ -10,9 +14,25 @@ class Login extends React.Component{
         senha:''
     }
 
+    constructor(){
+        super()
+        this.service = new UsuarioService()
+    }
+
     entrar = () => {
-        console.log('email: ', this.state.email)
-        console.log('senha: ', this.state.senha)
+        this.service.autenticar({
+            email: this.state.email,
+            senha: this.state.senha
+        }).then(response => {
+            LocalStorageService.adicionarItem('_usuario_logado', response.data)
+            this.props.history.push('/home')
+        }).catch(erro => {
+            mensagemErro('Erro', erro.response.data)
+        })
+    }
+
+    cadastrar = () => {
+        this.props.history.push("/cadastro-usuarios")
     }
 
     render(){
@@ -45,7 +65,7 @@ class Login extends React.Component{
                                                         placeholder='Password' />
                                                 </FormGroup>
                                                 <button className='btn btn-success' onClick={this.entrar}>Entrar</button>
-                                                <button className='btn btn-danger'>Cadastrar</button>
+                                                <button className='btn btn-danger' onClick={this.cadastrar}>Cadastrar</button>
                                             </fieldset>
                                         </div>
                                     </div>
@@ -60,4 +80,4 @@ class Login extends React.Component{
     }
 }
 
-export default Login
+export default withRouter(Login)
